@@ -1,0 +1,39 @@
+
+# dbt_project.yml
+name: 'job_intelligent'
+version: '1.0.0'
+config-version: 2
+
+profile: 'job_intelligent'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  job_intelligent:
+    bronze:
+      +materialized: view
+    
+    silver:
+      +materialized: table
+    
+    gold:
+      +materialized: table
+
+seeds:
+  quote_columns: true
+
+vars:
+  data_path: "../data"
+  bronze_path: "../data/bronze"
+  silver_path: "../data/silver"
+  gold_path: "../data/gold"

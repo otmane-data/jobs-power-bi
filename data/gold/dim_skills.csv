@@ -1,0 +1,10 @@
+skill_id,skill_name,skill_category,created_at
+1,Airflow,DataOps/DevOps,2026-01-08 11:38:51.159315+01:00
+2,Docker,DataOps/DevOps,2026-01-08 11:38:51.159315+01:00
+3,Looker,BI Tool,2026-01-08 11:38:51.159315+01:00
+4,NumPy,Data Analysis Library,2026-01-08 11:38:51.159315+01:00
+5,Pandas,Data Analysis Library,2026-01-08 11:38:51.159315+01:00
+6,PyTorch,ML/DL Library,2026-01-08 11:38:51.159315+01:00
+7,Scala,Programming Language,2026-01-08 11:38:51.159315+01:00
+8,Tableau,BI Tool,2026-01-08 11:38:51.159315+01:00
+9,TensorFlow,ML/DL Library,2026-01-08 11:38:51.159315+01:00
