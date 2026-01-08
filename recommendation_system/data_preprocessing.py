@@ -5,7 +5,7 @@ import re
 from typing import List, Dict, Set
 import pandas as pd
 import numpy as np
-from config import DATA_SKILLS, EXPERIENCE_LEVELS
+from config import DATA_SKILLS, SKILL_ALIASES, EXPERIENCE_LEVELS, FACT_JOBS_PATH, DIM_COMPANY_PATH, DIM_LOCATION_PATH
 
 
 class JobDataPreprocessor:
@@ -15,18 +15,70 @@ class JobDataPreprocessor:
         self.data_skills = set([skill.lower() for skill in DATA_SKILLS])
         self.experience_keywords = EXPERIENCE_LEVELS
     
-    def load_jobs(self, csv_path: str) -> pd.DataFrame:
+    def load_jobs(self) -> pd.DataFrame:
         """
-        Charge les offres d'emploi depuis le CSV
+        Charge et joint les offres d'emploi depuis la couche Gold dbt
         
-        Args:
-            csv_path: Chemin vers le fichier CSV
-            
         Returns:
-            DataFrame avec les offres
+            DataFrame avec les offres jointes et nettoyées
         """
-        df = pd.read_csv(csv_path)
-        print(f"✓ Chargé {len(df):,} offres d'emploi")
+        print(f"Chargement de la couche Gold...")
+        
+        # Charger les tables
+        fact_jobs = pd.read_csv(FACT_JOBS_PATH)
+        dim_company = pd.read_csv(DIM_COMPANY_PATH)
+        dim_location = pd.read_csv(DIM_LOCATION_PATH)
+        
+        # Jointures avec suffixes pour éviter les collisions de colonnes
+        print("Fusion des tables (Facts + Dimensions)...")
+        # On ne prend que le nom de l'entreprise
+        df = fact_jobs.merge(dim_company[['company_id', 'company_name']], on='company_id', how='left', suffixes=('', '_company'))
+        # On prend city et country de dim_location si besoin
+        df = df.merge(dim_location[['location_id', 'city', 'country']], on='location_id', how='left', suffixes=('', '_location'))
+        
+        # Nettoyage des noms de colonnes
+        df.columns = [c.strip() for c in df.columns]
+        
+        # Renommer les colonnes
+        # Note: on utilise les colonnes de fact_jobs en priorité (sans suffixe)
+        df = df.rename(columns={
+            'job_title': 'title',
+            'job_description': 'description',
+            'company_name': 'companyName',
+            'company_url': 'companyUrl',
+            'city': 'location',
+            'contract_type': 'contractType',
+            'job_url': 'jobUrl',
+            'posted_time': 'postedTime',
+            'work_type': 'workType'
+        })
+        
+        # Sécurité pour les champs critiques
+        metadata_map = {
+            'job_url': 'jobUrl',
+            'company_url': 'companyUrl',
+            'posted_time': 'postedTime',
+            'work_type': 'workType',
+            'contract_type': 'contractType',
+            'job_title': 'title',
+            'job_description': 'description',
+            'job_category': 'jobCategory',
+            'city': 'location'
+        }
+        
+        for old_col, new_col in metadata_map.items():
+            if new_col not in df.columns and old_col in df.columns:
+                df[new_col] = df[old_col]
+        
+        # Supprimer les doublons de contenu (même titre, entreprise et description)
+        initial_count = len(df)
+        df = df.drop_duplicates(subset=['title', 'companyName', 'description'])
+        dupes_removed = initial_count - len(df)
+        
+        if dupes_removed > 0:
+            print(f"Nettoyage : {dupes_removed} doublons de contenu supprimés")
+        
+        print(f"Chargé {len(df):,} offres d'emploi uniques depuis la couche Gold")
         return df
     
     def clean_text(self, text: str) -> str:
@@ -81,12 +133,19 @@ class JobDataPreprocessor:
         text_lower = text.lower()
         found_skills = set()
         
-        # Recherche de chaque compétence dans le texte
+        # 1. Recherche des compétences canoniques du dictionnaire
         for skill in DATA_SKILLS:
             # Utiliser word boundaries pour éviter les faux positifs
+            # On cherche de manière insensible à la casse
             pattern = r'\b' + re.escape(skill.lower()) + r'\b'
             if re.search(pattern, text_lower):
                 found_skills.add(skill)
+        
+        # 2. Gestion des alias (ex: T-SQL -> SQL, M365 -> Office 365)
+        for alias, canonical in SKILL_ALIASES.items():
+            pattern = r'\b' + re.escape(alias.lower()) + r'\b'
+            if re.search(pattern, text_lower):
+                found_skills.add(canonical)
         
         return sorted(list(found_skills))
     
@@ -216,7 +275,8 @@ class JobDataPreprocessor:
         # Supprimer les lignes avec texte vide
         df_processed = df_processed[df_processed['combined_text'].str.len() > 50].reset_index(drop=True)
         
-        print(f"✓ Préprocessing terminé: {len(df_processed):,} offres valides")
+        print(f"Préprocessing terminé: {len(df_processed):,} offres valides")
+        print(f"DEBUG FINAL: Colonnes finales: {df_processed.columns.tolist()}")
         
         return df_processed
     
@@ -282,13 +342,10 @@ def normalize_location(location: str) -> str:
 
 if __name__ == "__main__":
     # Test du preprocessor
-    from config import JOBS_CSV_PATH
-    
     preprocessor = JobDataPreprocessor()
     
-    # Charger un échantillon
-    df = preprocessor.load_jobs(JOBS_CSV_PATH)
-    df_processed = preprocessor.preprocess_jobs_df(df, sample_size=1000)
+    # Charger les données Gold
+    df_processed = preprocessor.preprocess_jobs_df(preprocessor.load_jobs(), sample_size=1000)
     
     # Afficher les statistiques
     stats = preprocessor.get_statistics(df_processed)
@@ -301,10 +358,10 @@ if __name__ == "__main__":
     print(f"Localisations uniques: {stats['unique_locations']:,}")
     print(f"Compétences moyennes par offre: {stats['avg_skills_per_job']:.1f}")
     
-    print("\n📊 Top 10 compétences:")
+    print("\nTop 10 compétences :")
     for skill, count in stats['top_10_skills']:
         print(f"  {skill}: {count:,}")
     
-    print("\n📈 Distribution niveau d'expérience:")
+    print("\nDistribution niveau d'expérience :")
     for level, count in stats['experience_level_distribution'].items():
         print(f"  {level}: {count:,}")

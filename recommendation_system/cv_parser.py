@@ -235,9 +235,9 @@ if __name__ == "__main__":
             text = parser.parse_cv(cv_path)
             cleaned_text = parser.clean_text(text)
             
-            print("=" * 80)
-            print(f"CV parsé: {cv_path}")
-            print("=" * 80)
+            print("-" * 80)
+            print(f"CV parse : {cv_path}")
+            print("-" * 80)
             print(cleaned_text[:500])  # Afficher les 500 premiers caractères
             print(f"\n... (Total: {len(cleaned_text)} caractères)")
         except Exception as e:

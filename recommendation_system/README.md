@@ -1,8 +1,8 @@
-# Système de Recommandation d'Offres d'Emploi - Intelligence Artificielle
+# Système de Recommandation d'Offres d'Emploi
 
-Ce système de recommandation utilise l'intelligence artificielle (NLP avec Sentence-BERT) pour matcher intelligemment les profils candidats avec les offres d'emploi dans le domaine de la Data.
+Ce système de recommandation utilise des techniques de NLP (Sentence-BERT) pour matcher les profils candidats avec les offres d'emploi dans le domaine de la Data.
 
-## 🎯 Fonctionnalités
+## Fonctionnalités
 
 - **Analyse Sémantique Avancée** : Utilise Sentence-BERT pour comprendre le sens des descriptions
 - **Parsing de CV** : Extraction automatique du texte depuis PDF, DOCX, TXT
@@ -11,13 +11,13 @@ Ce système de recommandation utilise l'intelligence artificielle (NLP avec Sent
 - **API REST** : Interface FastAPI avec documentation automatique
 - **Interface Web** : Application Streamlit (en développement)
 
-## 📋 Prérequis
+## Prérequis
 
 - Python 3.8 ou supérieur
 - 4GB RAM minimum (pour charger les embeddings)
 - Windows, macOS, ou Linux
 
-## 🚀 Installation
+## Installation
 
 ### 1. Créer un environnement virtuel (recommandé)
 
@@ -47,7 +47,7 @@ pip install -r requirements.txt
 python -m spacy download fr_core_news_lg
 ```
 
-## 🎮 Utilisation
+## Utilisation
 
 ### Option 1 : Test Direct du Recommender
 
@@ -130,7 +130,7 @@ for rec in recommendations['recommendations']:
 streamlit run app.py
 ```
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
 recommendation_system/
@@ -151,7 +151,7 @@ recommendation_system/
     └── test_recommender.py      # Tests unitaires
 ```
 
-## 🔧 Configuration
+## Configuration
 
 Vous pouvez modifier les paramètres dans `config.py` :
 
@@ -189,7 +189,7 @@ DATA_SKILLS = [
 ]
 ```
 
-## 🧪 Tests
+## Tests
 
 ```bash
 # Tester le parser de CV
@@ -202,7 +202,7 @@ python data_preprocessing.py
 python job_recommender.py
 ```
 
-## 📊 Performance
+## Performance
 
 ### Première Exécution
 - **Chargement données** : ~5 secondes
@@ -221,7 +221,7 @@ python job_recommender.py
 - **DataFrame** : ~200MB
 - **Total** : ~1GB RAM
 
-## 🐛 Dépannage
+## Dépannage
 
 ### Erreur: "Module not found"
 ```bash
@@ -243,7 +243,7 @@ Vérifier la connexion internet (téléchargement automatique des modèles Huggi
 - Certains PDFs complexes peuvent avoir des problèmes d'extraction
 - Essayer de sauvegarder le CV en format texte
 
-## 🔮 Prochaines Étapes
+## Prochaines Étapes
 
 - [ ] Interface Streamlit complète
 - [ ] Système de feedback utilisateur
@@ -252,15 +252,15 @@ Vérifier la connexion internet (téléchargement automatique des modèles Huggi
 - [ ] Export vers Power BI
 - [ ] Déploiement cloud (Azure/AWS)
 
-## 📝 License
+## License
 
 Projet académique - Tous droits réservés
 
-## 👥 Auteur
+## Auteur
 
 Développé dans le cadre du projet "Job Intelligent Dashboard" pour l'analyse du marché de l'emploi Data.
 
-## 🙏 Remerciements
+## Remerciements
 
 Technologies utilisées :
 - [Sentence-Transformers](https://www.sbert.net/)

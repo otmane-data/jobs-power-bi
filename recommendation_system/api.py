@@ -13,7 +13,7 @@ from config import API_HOST, API_PORT, DEFAULT_TOP_K, MAX_TOP_K
 # Initialiser l'application FastAPI
 app = FastAPI(
     title="Job Recommendation API",
-    description="API de recommandation d'offres d'emploi basée sur l'IA",
+    description="API de recommandation d'offres d'emploi",
     version="1.0.0"
 )
 
@@ -100,9 +100,9 @@ class StatsResponse(BaseModel):
 async def startup_event():
     """Initialisation au démarrage de l'API"""
     global recommender
-    print("\n🚀 Démarrage de l'API de recommandation...")
+    print("\nDémarrage de l'API de recommandation...")
     recommender = JobRecommender()
-    print("✓ API prête à recevoir des requêtes!\n")
+    print("API prête à recevoir des requêtes!\n")
 
 
 # Endpoints
@@ -309,7 +309,7 @@ async def get_statistics():
 # Lancement de l'application
 if __name__ == "__main__":
     print("\n" + "="*80)
-    print("DÉMARRAGE DE L'API DE RECOMMANDATION D'OFFRES D'EMPLOI")
+    print("DEMARRAGE DE L'API DE RECOMMANDATION D'OFFRES D'EMPLOI")
     print("="*80)
     print(f"Host: {API_HOST}")
     print(f"Port: {API_PORT}")

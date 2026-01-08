@@ -1,6 +1,6 @@
 # Guide d'Installation et Démarrage Rapide
 
-## 🚀 Installation Rapide (5 minutes)
+## Installation Rapide (5 minutes)
 
 ### Étape 1 : Créer l'environnement virtuel
 
@@ -37,7 +37,7 @@ python job_recommender.py
 
 ---
 
-## 🎯 Démarrage Rapide
+## Démarrage Rapide
 
 ### Option A : Interface Streamlit (Recommandé pour débuter)
 
@@ -72,7 +72,7 @@ Documentation interactive : http://localhost:8000/docs
 
 ---
 
-## 📝 Exemples d'Utilisation
+## Exemples d'Utilisation
 
 ### 1. Via l'Interface Streamlit
 
@@ -152,7 +152,7 @@ for i, rec in enumerate(recommendations, 1):
 
 ---
 
-## 🛠️ Utilisation Avancée
+## Utilisation Avancée
 
 ### Changer le Modèle d'Embeddings
 
@@ -198,7 +198,7 @@ self.jobs_df = self.preprocessor.preprocess_jobs_df(df_raw, sample_size=10000)
 
 ---
 
-## 📊 Endpoints API Disponibles
+## Endpoints API Disponibles
 
 | Endpoint | Méthode | Description |
 |----------|---------|-------------|
@@ -214,7 +214,7 @@ Documentation complète : http://localhost:8000/docs (une fois l'API lancée)
 
 ---
 
-## 🐛 Résolution de Problèmes
+## Résolution de Problèmes
 
 ### Erreur : "ModuleNotFoundError"
 
@@ -242,7 +242,7 @@ Vérifier la connexion internet (téléchargement automatique depuis HuggingFace
 
 ---
 
-## ⏱️ Temps de Traitement
+## Temps de Traitement
 
 ### Première Exécution
 - Création embeddings : **5-10 minutes** (une seule fois)
@@ -254,7 +254,7 @@ Vérifier la connexion internet (téléchargement automatique depuis HuggingFace
 
 ---
 
-## 💾 Fichiers Générés
+## Fichiers Générés
 
 Après la première exécution, vous trouverez dans `data/embeddings/` :
 
@@ -266,7 +266,7 @@ Après la première exécution, vous trouverez dans `data/embeddings/` :
 
 ---
 
-## 🔄 Mettre à Jour les Données
+## Mettre à Jour les Données
 
 Si vous modifiez `final_data.csv` :
 
@@ -279,11 +279,11 @@ recommender = JobRecommender(force_reload=True)
 
 ---
 
-## 📞 Support
+## Support
 
 En cas de problème :
 1. Vérifier les logs dans la console
 2. Consulter la documentation dans README.md
 3. Tester avec un échantillon réduit d'abord
 
-Bon développement ! 🚀
+Bon développement !

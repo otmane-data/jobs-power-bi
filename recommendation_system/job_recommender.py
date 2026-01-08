@@ -13,7 +13,7 @@ import faiss
 from tqdm import tqdm
 
 from config import (
-    EMBEDDING_MODEL_NAME, EMBEDDING_DIMENSION, JOBS_CSV_PATH,
+    EMBEDDING_MODEL_NAME, EMBEDDING_DIMENSION,
     EMBEDDINGS_PATH, JOBS_PROCESSED_PATH, FAISS_INDEX_PATH,
     SCORING_WEIGHTS, DEFAULT_TOP_K, MAX_TOP_K
 )
@@ -39,7 +39,7 @@ class JobRecommender:
         self.preprocessor = JobDataPreprocessor()
         self.cv_parser = CVParser()
         
-        print("🚀 Initialisation du système de recommandation...")
+        print("Initialisation du système de recommandation...")
         
         # Charger le modèle d'embeddings
         print(f"  → Chargement du modèle: {EMBEDDING_MODEL_NAME}")
@@ -56,7 +56,7 @@ class JobRecommender:
         else:
             self._create_embeddings()
         
-        print("✓ Système de recommandation prêt!")
+        print("Système de recommandation prêt.")
     
     def _embeddings_exist(self) -> bool:
         """Vérifie si les embeddings existent déjà"""
@@ -68,10 +68,10 @@ class JobRecommender:
     
     def _create_embeddings(self):
         """Crée les embeddings pour toutes les offres"""
-        print("\n📊 Création des embeddings (cette opération peut prendre quelques minutes)...")
+        print("\nCréation des embeddings (cette opération peut prendre quelques minutes)...")
         
         # Charger et préprocesser les données
-        df_raw = self.preprocessor.load_jobs(str(JOBS_CSV_PATH))
+        df_raw = self.preprocessor.load_jobs()
         self.jobs_df = self.preprocessor.preprocess_jobs_df(df_raw)
         
         # Générer les embeddings
@@ -94,7 +94,7 @@ class JobRecommender:
         print("  → Sauvegarde des embeddings...")
         self._save_embeddings()
         
-        print("✓ Embeddings créés et sauvegardés")
+        print("Embeddings créés et sauvegardés.")
     
     def _build_faiss_index(self):
         """Construit l'index FAISS pour la recherche rapide"""
@@ -266,19 +266,48 @@ class JobRecommender:
         # Score de localisation
         location_score = 1.0
         if location_preference:
-            location_norm = normalize_location(location_preference)
-            job_location_norm = normalize_location(job['location_clean'])
-            location_score = 1.0 if location_norm == job_location_norm else 0.3
+            pref = location_preference.lower().strip()
+            job_loc = str(job['location']).lower().strip()
+            
+            # Match exact ou inclusion (ex: "Canada" dans "Toronto, Canada")
+            if pref in job_loc or job_loc in pref:
+                location_score = 1.0
+            elif any(keyword in job_loc for keyword in ['remote', 'télétravail', 'distance']):
+                # Les postes en remote ont une pénalité légère car ils restent potentiellement accessibles
+                location_score = 0.7
+            else:
+                # Grosse pénalité pour les localisations qui ne matchent pas (évite les jobs US par défaut)
+                location_score = 0.1
         
         # Score de type de contrat
         contract_score = 1.0
         if contract_type_preference:
             contract_score = 1.0 if contract_type_preference.lower() in job['contractType_clean'].lower() else 0.5
         
-        # Score d'expérience
+        # Score d'expérience amélioré
         experience_score = 1.0
         if experience_level:
-            experience_score = 1.0 if experience_level == job['experience_level'] else 0.7
+            job_level = job.get('experience_level', 'unknown')
+            
+            levels_order = {'junior': 0, 'mid': 1, 'senior': 2, 'manager': 3}
+            
+            if experience_level in levels_order and job_level in levels_order:
+                cand_idx = levels_order[experience_level]
+                job_idx = levels_order[job_level]
+                
+                # Même niveau
+                if cand_idx == job_idx:
+                    experience_score = 1.0
+                # Trop d'expérience pour le poste (ex: Senior postule pour Junior) -> Acceptable mais pas idéal
+                elif cand_idx > job_idx:
+                    experience_score = 0.8
+                # Pas assez d'expérience (ex: Junior postule pour Senior) -> Pénalité
+                else:
+                    dist = job_idx - cand_idx
+                    experience_score = 0.4 if dist == 1 else 0.1
+            else:
+                # Si le niveau du job est inconnu, on reste neutre
+                experience_score = 0.5
         
         # Calcul du score final pondéré
         final_score = (

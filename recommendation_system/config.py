@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Chemins des fichiers
 BASE_DIR = Path(__file__).parent.parent
-DATA_DIR = BASE_DIR / "jobs-power-bi"
+DATA_DIR = BASE_DIR
 MODEL_DIR = Path(__file__).parent / "data" / "models"
 EMBEDDINGS_DIR = Path(__file__).parent / "data" / "embeddings"
 
@@ -14,8 +14,14 @@ EMBEDDINGS_DIR = Path(__file__).parent / "data" / "embeddings"
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 EMBEDDINGS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Fichiers de données
-JOBS_CSV_PATH = DATA_DIR / "final_data.csv"
+# Fichiers de données (Couche Gold)
+GOLD_DIR = DATA_DIR / "data" / "gold"
+FACT_JOBS_PATH = GOLD_DIR / "fact_job_offers.csv"
+DIM_COMPANY_PATH = GOLD_DIR / "dim_company.csv"
+DIM_LOCATION_PATH = GOLD_DIR / "dim_location.csv"
+FACT_SKILLS_PATH = GOLD_DIR / "fact_job_skills.csv"
+
+# Chemins pour les artefacts du modèle
 EMBEDDINGS_PATH = EMBEDDINGS_DIR / "job_embeddings.npy"
 JOBS_PROCESSED_PATH = EMBEDDINGS_DIR / "jobs_processed.pkl"
 FAISS_INDEX_PATH = EMBEDDINGS_DIR / "faiss_index.bin"
@@ -25,68 +31,108 @@ EMBEDDING_MODEL_NAME = "sentence-transformers/distiluse-base-multilingual-cased-
 EMBEDDING_DIMENSION = 512
 SPACY_MODEL = "fr_core_news_lg"  # ou "en_core_web_lg" pour anglais
 
-# Compétences techniques communes dans la data
+# Compétences techniques communes dans la data et business
+# Cette liste contient les noms "canoniques" (affichés à l'utilisateur)
 DATA_SKILLS = [
     # Langages de programmation
-    'Python', 'R', 'Java', 'Scala', 'Julia', 'C++', 'JavaScript', 'TypeScript',
+    'Python', 'R', 'Java', 'Scala', 'Julia', 'C++', 'C#', 'JavaScript', 'TypeScript', 'Node.js',
+    'Go', 'Swift', 'Kotlin', 'PHP', 'Ruby', 'Rust', 'MATLAB', 'SAS', 'VBA', 'Fortran',
     
     # Bases de données et SQL
     'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Cassandra', 'DynamoDB',
-    'Oracle', 'SQL Server', 'NoSQL', 'Neo4j', 'Elasticsearch',
+    'Oracle', 'SQL Server', 'NoSQL', 'Neo4j', 'Elasticsearch', 'MariaDB', 'SQLite',
+    'Snowflake', 'BigQuery', 'Redshift', 'Databricks', 'Teradata', 'HBase', 'Hive',
+    'Presto', 'Trino',
     
-    # Big Data
-    'Spark', 'Hadoop', 'Kafka', 'Flink', 'Storm', 'Hive', 'Pig', 'HBase',
-    'Databricks', 'Snowflake', 'Redshift', 'BigQuery',
+    # Data Engineering / Big Data
+    'ETL', 'ELT', 'Data Pipeline', 'Data Warehouse', 'Data Lake', 'Data Mesh', 'Data Fabric',
+    'Spark', 'Hadoop', 'Kafka', 'Flink', 'Storm', 'Airflow', 'Luigi', 'Prefect', 'Dagster',
+    'dbt', 'Fivetran', 'Stitch', 'Talend', 'Informatica', 'DataStage', 'NiFi', 'HDFS', 'Parquet',
+    'Dask', 'Koalas', 'Polars', 'Ray',
     
-    # Machine Learning / Deep Learning
-    'Machine Learning', 'Deep Learning', 'Neural Networks', 'NLP', 'Computer Vision',
-    'TensorFlow', 'PyTorch', 'Keras', 'scikit-learn', 'XGBoost', 'LightGBM',
-    'Random Forest', 'Regression', 'Classification', 'Clustering',
-    'Reinforcement Learning', 'Transfer Learning', 'GANs', 'Transformers',
-    'BERT', 'GPT', 'LLM', 'Large Language Models',
+    # Machine Learning / Deep Learning / AI
+    'Machine Learning', 'Deep Learning', 'Artificial Intelligence', 'Natural Language Processing',
+    'Computer Vision', 'TensorFlow', 'PyTorch', 'Keras', 'Sklearn', 'XGBoost', 'LightGBM', 'CatBoost',
+    'Neural Networks', 'Reinforcement Learning', 'Transfer Learning', 'GANs',
+    'Large Language Models', 'GPT', 'BERT', 'Transformers', 'Generative AI',
+    'Prompt Engineering', 'LangChain', 'LlamaIndex', 'AutoGPT', 'Vector Database',
+    'Pinecone', 'Milvus', 'Weaviate', 'Chroma',
     
-    # Data Engineering
-    'ETL', 'ELT', 'Data Pipeline', 'Data Warehouse', 'Data Lake', 'Data Mesh',
-    'Airflow', 'Luigi', 'Prefect', 'dbt', 'Fivetran', 'Stitch',
-    
-    # Cloud Platforms
-    'AWS', 'Azure', 'GCP', 'Google Cloud', 'Amazon Web Services', 'Microsoft Azure',
-    'S3', 'EC2', 'Lambda', 'EMR', 'Glue', 'SageMaker', 'Kinesis',
-    'Azure ML', 'Azure Databricks', 'Azure Data Factory', 'Azure Synapse',
-    'BigQuery', 'Cloud Functions', 'Cloud Run', 'Dataflow', 'Dataproc',
-    
-    # Conteneurisation et Orchestration
-    'Docker', 'Kubernetes', 'K8s', 'Helm', 'Docker Compose',
-    
-    # CI/CD et Version Control
-    'Git', 'GitHub', 'GitLab', 'Bitbucket', 'Jenkins', 'CircleCI', 'Travis CI',
-    'Azure DevOps', 'GitOps', 'Terraform', 'Ansible', 'CloudFormation',
+    # Data analysis & Statistics
+    'Data Analysis', 'Data Analytics', 'Statistics', 'Statistical Modeling', 'Time Series',
+    'Forecasting', 'A/B Testing', 'Hypothesis Testing', 'Mathematics', 'Optimization',
+    'Operations Research', 'Exploratory Data Analysis', 'Econometrics',
     
     # Data Visualization et BI
-    'Tableau', 'Power BI', 'Looker', 'Qlik', 'Metabase', 'Superset',
-    'D3.js', 'Plotly', 'Matplotlib', 'Seaborn', 'ggplot2',
+    'Tableau', 'Power BI', 'Looker', 'Qlik', 'Metabase', 'Superset', 'Grafana', 'Kibana',
+    'D3.js', 'Plotly', 'Matplotlib', 'Seaborn', 'ggplot2', 'MicroStrategy', 'Spotfire',
+    'Google Data Studio', 'Looker Studio', 'QuickSight', 'Dashboard', 'Reporting',
     
-    # Python Libraries
-    'Pandas', 'NumPy', 'SciPy', 'Matplotlib', 'Seaborn', 'Plotly',
-    'Jupyter', 'Notebook', 'PySpark', 'Dask', 'Polars',
+    # Cloud Platforms
+    'AWS', 'Azure', 'GCP', 'Cloud Computing', 'S3', 'EC2', 'Lambda', 'EMR',
+    'SageMaker', 'Azure ML', 'Azure Databricks', 'Azure Data Factory', 'Azure Synapse',
+    'Cloud Functions', 'Cloud Run', 'Dataflow', 'Dataproc', 'Heroku', 'DigitalOcean',
     
-    # MLOps
-    'MLflow', 'Kubeflow', 'MLOps', 'Model Registry', 'Feature Store',
-    'Weights & Biases', 'Neptune.ai', 'DVC',
+    # DevOps / CI/CD / Infrastructure
+    'Git', 'GitHub', 'GitLab', 'Bitbucket', 'Docker', 'Kubernetes', 'Helm',
+    'Jenkins', 'CircleCI', 'Travis CI', 'Azure DevOps', 'GitHub Actions',
+    'Terraform', 'Ansible', 'CloudFormation', 'Infrastructure as Code',
+    'Linux', 'Unix', 'Bash', 'Shell', 'PowerShell',
     
-    # API et Web
-    'REST API', 'FastAPI', 'Flask', 'Django', 'GraphQL', 'gRPC',
+    # Business Analysis & Project Management
+    'Business Analysis', 'Business Intelligence', 'Requirements Gathering',
+    'Functional Specifications', 'Agile', 'Scrum', 'Kanban', 'Lean', 'Six Sigma',
+    'Project Management', 'Product Management', 'Stakeholder Management', 'Jira',
+    'Confluence', 'Trello', 'Asana', 'Product Roadmap', 'User Stories', 'SDLC',
     
-    # Statistiques et Math
-    'Statistics', 'Statistical Modeling', 'Time Series', 'Forecasting',
-    'A/B Testing', 'Hypothesis Testing', 'Bayesian Statistics',
+    # Enterprise Tools (CRM/ERP/...)
+    'Salesforce', 'SAP', 'Oracle ERP', 'Dynamics 365', 'Workday', 'ServiceNow',
+    'HubSpot', 'Marketo', 'Zendesk', 'NetSuite', 'Alteryx',
     
-    # Méthodologies
-    'Agile', 'Scrum', 'Kanban', 'DevOps', 'DataOps', 'CI/CD',
+    # Collaboration & Productivity
+    'Excel', 'PowerPoint', 'Word', 'Outlook', 'Office 365',
+    'Google Workspace', 'Slack', 'Microsoft Teams', 'SharePoint',
     
-    # Autres
-    'Excel', 'VBA', 'SAP', 'Salesforce', 'Jira', 'Confluence'
+    # Soft Skills
+    'Communication', 'Leadership', 'Problem Solving', 'Critical Thinking', 'Teamwork',
+    'Analytical Thinking', 'Decision Making', 'Time Management', 'Creativity'
 ]
+
+# Alias pour normaliser les compétences (Alias: Nom Canonique dans DATA_SKILLS)
+SKILL_ALIASES = {
+    'ai': 'Artificial Intelligence',
+    'artificial intelligence': 'Artificial Intelligence',
+    'machine learning': 'Machine Learning',
+    'ml': 'Machine Learning',
+    'nlp': 'Natural Language Processing',
+    'natural language processing': 'Natural Language Processing',
+    'genai': 'Generative AI',
+    'generative ai': 'Generative AI',
+    'llm': 'Large Language Models',
+    'large language models': 'Large Language Models',
+    'microsoft 365': 'Office 365',
+    'm365': 'Office 365',
+    'office 365': 'Office 365',
+    'google cloud platform': 'GCP',
+    'google cloud': 'GCP',
+    'gcp': 'GCP',
+    'amazon web services': 'AWS',
+    'aws': 'AWS',
+    'microsoft azure': 'Azure',
+    'azure': 'Azure',
+    't-sql': 'SQL',
+    'pl/sql': 'SQL',
+    'pyspark': 'Spark',
+    'spark': 'Spark',
+    'scikit-learn': 'Sklearn',
+    'sklearn': 'Sklearn',
+    'visual basic': 'VBA',
+    'k8s': 'Kubernetes',
+    'iac': 'Infrastructure as Code',
+    'eda': 'Exploratory Data Analysis',
+    'bi': 'Business Intelligence',
+    'business intelligence': 'Business Intelligence'
+}
 
 # Niveaux d'expérience (pour extraction)
 EXPERIENCE_LEVELS = {
@@ -98,11 +144,11 @@ EXPERIENCE_LEVELS = {
 
 # Paramètres de scoring
 SCORING_WEIGHTS = {
-    'semantic_similarity': 0.50,  # Similarité sémantique globale
-    'skills_match': 0.25,         # Correspondance des compétences
-    'location_match': 0.10,       # Compatibilité localisation
-    'contract_type_match': 0.10,  # Type de contrat
-    'experience_match': 0.05      # Niveau d'expérience
+    'semantic_similarity': 0.35,
+    'skills_match': 0.25,
+    'location_match': 0.20,
+    'contract_type_match': 0.05,
+    'experience_match': 0.15
 }
 
 # Paramètres de recherche
