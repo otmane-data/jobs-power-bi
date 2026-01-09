@@ -2,6 +2,20 @@
 
 Ce système de recommandation utilise des techniques de NLP (Sentence-BERT) pour matcher les profils candidats avec les offres d'emploi dans le domaine de la Data.
 
+## Vue d'ensemble
+
+### Architecture du Système
+![Architecture Système](assets/1.jpeg)
+
+### Pipeline de Traitement
+![Pipeline de Traitement](assets/2.jpeg)
+
+### Interface API
+![Interface API](assets/3.jpeg)
+
+### Résultats et Recommandations
+![Résultats et Recommandations](assets/4.jpeg)
+
 ## Fonctionnalités
 
 - **Analyse Sémantique Avancée** : Utilise Sentence-BERT pour comprendre le sens des descriptions

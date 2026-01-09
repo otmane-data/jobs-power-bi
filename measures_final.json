@@ -1,0 +1,18 @@
+{
+  "Total Job Offers": "COUNTA(fact_job_offers[job_offer_id])",
+  "Total Companies": "DISTINCTCOUNT(dim_company[company_id])",
+  "Total Skills": "DISTINCTCOUNT(dim_skills[skill_id])",
+  "Total Locations": "DISTINCTCOUNT(dim_location[location_id])",
+  "Average Salary": "AVERAGE(fact_job_offers[salary])",
+  "Total Salary": "SUM(fact_job_offers[salary])",
+  "Remote Jobs": "SUMPRODUCT((fact_job_offers[is_remote]=1)*1)",
+  "Permanent Jobs": "SUMPRODUCT((fact_job_offers[is_permanent]=1)*1)",
+  "Total Job Skills": "COUNTA(fact_job_skills[job_skill_id])",
+  "Category Count": "DISTINCTCOUNT(fact_job_offers[job_category])",
+  "Jobs Per Company": "DIVIDE([Total Job Offers], [Total Companies])",
+  "Salary Per Skill": "DIVIDE([Total Salary], [Total Job Skills])",
+  "Avg Job Salary": "AVERAGE(fact_job_offers[salary])",
+  "Remote Percentage": "DIVIDE([Remote Jobs], [Total Job Offers])",
+  "Most Popular Category": "MODE.SNGL(fact_job_offers[job_category])",
+  "Job Count": "COUNTA(fact_job_offers[job_offer_id])"
+}
